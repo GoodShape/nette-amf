@@ -3,11 +3,10 @@
 namespace Goodshape\Amf\Application;
 
 
-use App\BasePresenter;
 use Nette\Application;
 use Nette;
 
-class AmfPresenter extends BasePresenter {
+class AmfPresenter extends Application\UI\Presenter {
 
     /** @var bool used for debugging */
     private $innerCall = FALSE;
@@ -42,16 +41,15 @@ class AmfPresenter extends BasePresenter {
                 if($type === 'array' && !$p) {
                     $p = [];
                 }
+                if($type === 'integer' && !$p) {
+                    $p = NULL;
+                }
                 $newParameters[$param->name] = $p;
             }
 
         }
         $this->params = $newParameters;
 
-    }
-
-    protected function send($data, $returnCode=0, $message='') {
-        $this->sendResponse(new Response($data, $returnCode, $message));
     }
 
     public final function sendResponse(Application\IResponse $response) {
@@ -74,7 +72,7 @@ class AmfPresenter extends BasePresenter {
     /**
      * @return boolean
      */
-    public function getInnerCall() {
+    public function isInnerCall() {
         return $this->innerCall;
     }
 
