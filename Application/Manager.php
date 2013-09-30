@@ -7,12 +7,9 @@ use Goodshape\Amf\Helpers\CustomClassConvertor;
 use Goodshape\Amf\Helpers\Deserializer;
 use Goodshape\Amf\Helpers\Packet;
 use Goodshape\Amf\Helpers\Serializer;
-use Nette\Caching\IStorage;
-use Nette\Environment;
+use Nette\Application\IResponse;
 use Nette\Http\Request;
 use Nette\Object;
-use Nette\Utils\Strings;
-use ReflectionMethod;
 use TokenReflection;
 
 /**
@@ -40,6 +37,7 @@ class Manager extends Object {
 
     /** @var array */
     private $config;
+    private $destinationMappings;
 
     /**
      * @param array $config
@@ -49,6 +47,7 @@ class Manager extends Object {
         $this->httpRequest = $httpRequest;
         $this->config = $config;
         $this->classConvertor = new CustomClassConvertor(isset($config['customNamespaces'])?$config['customNamespaces']:NULL);
+        $this->destinationMappings = isset($config['mappings'])?$config['mappings']:[];
     }
 
 
@@ -70,7 +69,7 @@ class Manager extends Object {
 
 
 
-    public function setResponse(Response $response) {
+    public function setResponse(IResponse $response) {
         $this->responses[$this->currentMessageIndex] = $response;
         $this->currentMessageIndex++;
     }
@@ -108,9 +107,8 @@ class Manager extends Object {
      */
     public function createApplicationRequest() {
 
-        $target= $this->getDestination();
-        $data = $this->getData($target);
-        list($presenter, $action) = explode(":", $target);
+        list($presenter, $action) = $this->getDestination();
+        $data = $this->getData($presenter.':'.$action);
 
 
         return new \Nette\Application\Request($this->module.":".$presenter,
@@ -136,14 +134,15 @@ class Manager extends Object {
     }
 
     private function convertDestination($target) {
-        if(isset(self::$conversionTable[$target])) {
-            $target = self::$conversionTable[$target];
-        } else {
-            return $this->bcPresenter;
+        $serviceCall = str_replace(".", "/", $target);
+        $call = explode("/", $serviceCall);
+
+        $presenter = array_shift($call);
+        $action = array_shift($call);
+        if(isset($this->destinationMappings[$presenter.':'.$action])) {
+            return explode(":", $this->destinationMappings[$presenter.':'.$action]);
         }
-        $p = explode(":", $target);
-        $presenter = array_shift($p);
-        return [$presenter, array_shift($p)];
+        return [$presenter, $action];
     }
 
     /**
@@ -160,21 +159,6 @@ class Manager extends Object {
         $rawOutput = $serializer->serialize($packet);
         echo $rawOutput;
     }
-
-    /**
-     * conversion of old service names to new ones
-     *
-     * @var array
-     */
-    private static $conversionTable = [
-       /* 'UserService.login' => 'Sign:in',
-        'UserService.logout' => 'Sing:out',
-        'UserService.relogin' => 'Sign:getIdentity',
-        'UserService.setUserProfile' => 'User:update',
-        'UserService.register' => 'User:create',
-        'UserService.loginOrRegisterByFacebook' => 'Sign:facebook',
-        'UserService.getOrganizations' => 'Subjects:default'*/
-    ];
 
     /**
      * @return array

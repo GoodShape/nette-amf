@@ -2,6 +2,7 @@
 namespace Goodshape\Amf\Application;
 
 use Nette;
+use Nette\Application\IRouter;
 use Nette\Application\Request;
 use Nette\Utils\Strings;
 
@@ -12,7 +13,7 @@ use Nette\Utils\Strings;
  * @author Jan Langer <jan.langer@goodshape.cz>
  * @package App\Core\Amf
  */
-class Route implements \Nette\Application\IRouter {
+class Route implements IRouter {
 
     /** @var string URL mask */
     private $mask;
