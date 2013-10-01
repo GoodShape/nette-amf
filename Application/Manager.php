@@ -139,8 +139,8 @@ class Manager extends Object {
 
         $presenter = array_shift($call);
         $action = array_shift($call);
-        if(isset($this->destinationMappings[$presenter.':'.$action])) {
-            return explode(":", $this->destinationMappings[$presenter.':'.$action]);
+        if(isset($this->destinationMappings[$presenter.'/'.$action])) {
+            return explode(":", $this->destinationMappings[$presenter.'/'.$action]);
         }
         return [$presenter, $action];
     }
