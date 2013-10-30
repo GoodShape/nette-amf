@@ -47,6 +47,30 @@ class Route implements Nette\Application\IRouter {
 	const FILTER_TABLE = 'filterTable';
 	const FILTER_STRICT = 'filterStrict';
 
+    /** @var array */
+	public static $styles = array(
+		'#' => array( // default style for path parameters
+			self::PATTERN => '[^/]+',
+		),
+		'?#' => array( // default style for query parameters
+		),
+		'module' => array(
+			self::PATTERN => '[a-z][a-z0-9.-]*',
+		),
+		'presenter' => array(
+			self::PATTERN => '[a-z][a-z0-9.-]*',
+		),
+		'action' => array(
+			self::PATTERN => '[a-z][a-z0-9-]*',
+		),
+		'?module' => array(
+		),
+		'?presenter' => array(
+		),
+		'?action' => array(
+		),
+	);
+
 	/** @internal fixity types - how to handle default value? {@link Route::$metadata} */
 	const OPTIONAL = 0,
 		PATH_OPTIONAL = 1,
@@ -55,8 +79,6 @@ class Route implements Nette\Application\IRouter {
 	/** @var int */
 	public static $defaultFlags = 0;
 
-	/** @var array */
-	public static $styles = [];
 
 	/** @var string */
 	private $mask;
