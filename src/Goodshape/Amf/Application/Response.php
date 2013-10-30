@@ -23,11 +23,6 @@ class Response implements IResponse {
     public $timestamp;
 
     public function __construct($data, $returnCode = 0, $message = '') {
-        if($data instanceof \Response) {
-            $message = $data->dbgText;
-            $returnCode = $data->returnCode;
-            $data = $data->data;
-        }
         $this->data = $data;
         $this->dbgText = $message;
         $this->returnCode = $returnCode;
