@@ -23,9 +23,10 @@ class CustomClassConvertor {
      */
     function __construct($customClassesNamespaces) {
         if(!$customClassesNamespaces) {
-            $customClassesNamespaces = ["\\"];
+            $customClassesNamespaces = [""];
         }
         $this->customClassesNamespaces = $customClassesNamespaces;
+        $this->customClassesNamespaces[] = '';
     }
 
 
@@ -52,7 +53,7 @@ class CustomClassConvertor {
         if (isset($obj->$explicitTypeField)) {
             $customClassName = $obj->$explicitTypeField;
             foreach($this->customClassesNamespaces as $namespace) {
-                $fqcn = $namespace.$customClassName;
+                $fqcn = $namespace.'\\'.$customClassName;
                 if (class_exists($fqcn)) {
                     //class is available. Use it!
                     $classReflection = new ClassType($fqcn);

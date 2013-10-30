@@ -46,7 +46,7 @@ class Manager extends Object {
     function __construct($config, Request $httpRequest) {
         $this->httpRequest = $httpRequest;
         $this->config = $config;
-        $this->classConvertor = new CustomClassConvertor(isset($config['customNamespaces'])?$config['customNamespaces']:NULL);
+        $this->classConvertor = new CustomClassConvertor(isset($config['requestNamespaces'])?$config['requestNamespaces']:NULL);
         $this->destinationMappings = isset($config['mappings'])?$config['mappings']:[];
     }
 
