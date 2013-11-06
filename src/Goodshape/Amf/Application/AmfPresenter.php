@@ -36,7 +36,10 @@ class AmfPresenter extends Application\UI\Presenter {
             $counter = 0;
             foreach($mParams as $param) {
 
-                $p = $params[$counter++];
+                if(!isset($mParams[$counter])) {
+                    continue;
+                }
+                $p = $params[$counter];
                 $type = $param->isArray() ? 'array' : ($param->isDefaultValueAvailable() && $param->isOptional() ? gettype($param->getDefaultValue()) : 'NULL');
                 if($type === 'array' && !$p) {
                     $p = [];
@@ -45,6 +48,7 @@ class AmfPresenter extends Application\UI\Presenter {
                     $p = NULL;
                 }
                 $newParameters[$param->name] = $p;
+                $counter++;
             }
 
         }
