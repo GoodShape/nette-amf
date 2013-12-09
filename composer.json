@@ -1,6 +1,7 @@
 {
     "name": "goodshape/nette-amf",
     "description": "AMF protocol support to Nette Framework",
+    "license": ["Apache-2.0"],
     "homepage": "http://goodshape.cz",
     "authors": [
         {
