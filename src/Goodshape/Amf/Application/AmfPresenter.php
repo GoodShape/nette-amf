@@ -21,38 +21,38 @@ class AmfPresenter extends Application\UI\Presenter {
      */
     protected function startup() {
         parent::startup();
-        $params = $this->request->getParameters();
-        if(!isset($params[0])) {
+        $inputParams = $this->request->getParameters();
+        if(!isset($inputParams[0])) {
             return;
         }
         $actionMethod = $this->formatActionMethod($this->getAction());
-        $rc = $this->getReflection();
-        $newParameters = $params;
-        if($rc->hasMethod($actionMethod)) {
-            $rm = $rc->getMethod($actionMethod);
-            $mParams = $rm->getParameters();
+        $presenterReflection = $this->getReflection();
+        $outputParams = $inputParams;
+        if($presenterReflection->hasMethod($actionMethod)) {
+            $method = $presenterReflection->getMethod($actionMethod);
+            $methodParameters = $method->getParameters();
 
-            $newParameters = ['action' => $params['action']];
+            $outputParams = ['action' => $inputParams['action']];
             $counter = 0;
-            foreach($mParams as $param) {
+            foreach($methodParameters as $param) {
 
-                if(!isset($mParams[$counter])) {
+                if(!isset($methodParameters[$counter])) {
                     continue;
                 }
-                $p = $params[$counter];
+                $parameter = isset($inputParams[$counter])?$inputParams[$counter]:NULL;
                 $type = $param->isArray() ? 'array' : ($param->isDefaultValueAvailable() && $param->isOptional() ? gettype($param->getDefaultValue()) : 'NULL');
-                if($type === 'array' && !$p) {
-                    $p = [];
+                if($type === 'array' && !$parameter) {
+                    $parameter = [];
                 }
-                if($type === 'integer' && !$p) {
-                    $p = NULL;
+                if($type === 'integer' && !$parameter) {
+                    $parameter = NULL;
                 }
-                $newParameters[$param->name] = $p;
+                $outputParams[$param->name] = $parameter;
                 $counter++;
             }
 
         }
-        $this->params = $newParameters;
+        $this->params = $outputParams;
 
     }
 
