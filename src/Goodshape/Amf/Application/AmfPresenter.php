@@ -41,8 +41,8 @@ class AmfPresenter extends Application\UI\Presenter {
                 }
                 $parameter = isset($inputParams[$counter])?$inputParams[$counter]:NULL;
                 $type = $param->isArray() ? 'array' : ($param->isDefaultValueAvailable() && $param->isOptional() ? gettype($param->getDefaultValue()) : 'NULL');
-                if($type === 'array' && !$parameter) {
-                    $parameter = [];
+                if($type === 'array') {
+                    $parameter = !$parameter ? [] : (array) $parameter;
                 }
                 if($type === 'integer' && !$parameter) {
                     $parameter = NULL;
