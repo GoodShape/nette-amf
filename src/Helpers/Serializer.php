@@ -406,13 +406,13 @@ class Serializer {
         if (!$className) {
             throw new \Exception(Deserializer::FIELD_EXPLICIT_TYPE . ' not found on a object that is to be sent as typed. ' . print_r($d, true));
         }
+        $propertyNames = $this->getObjectProperties($d, $explicitTypeField);
         unset($d->$explicitTypeField);
         $this->writeUTF($className); // write the class name
-        $objVars = $d;
-        foreach ($objVars as $key => $data) { // loop over each element
+        foreach ($propertyNames as $key) { // loop over each element
             if ($key[0] != "\0") {
                 $this->writeUTF($key);  // write the name of the object
-                $this->writeData($data); // write the value of the object
+                $this->writeData($d->$key); // write the value of the object
             }
         }
         $this->writeObjectEnd();
@@ -872,12 +872,7 @@ class Serializer {
             $this->writeAmf3Int($traitsReference);
         } else {
             //no available traits information. Write the traits
-            $propertyNames = array();
-            foreach ($d as $key => $value) {
-                if ($key[0] != "\0" && $key != $explicitTypeField) { //Don't write protected properties or explicit type
-                    $propertyNames[] = $key;
-                }
-            }
+            $propertyNames = $this->getObjectProperties($d, $explicitTypeField);
 
             //U29O-traits:  0011 in LSBs, and number of properties
             $numProperties = count($propertyNames);
@@ -898,6 +893,26 @@ class Serializer {
         foreach ($propertyNames as $propertyName) {
             $this->writeAmf3Data($d->$propertyName);
         }
+    }
+
+    /**
+     * @param $d
+     * @param $explicitTypeField
+     * @return array
+     */
+    private function getObjectProperties($d, $explicitTypeField) {
+        $propertyNames = array();
+        foreach ($d as $key => $value) {
+            if ($key[0] != "\0" && $key != $explicitTypeField) { //Don't write protected properties or explicit type
+                $propertyNames[] = $key;
+            }
+        }
+        if($d instanceof \Nette\Object) {
+            $magicProperties = Utils::getNetteObjectProperties($d);
+            $propertyNames = array_unique(array_merge($propertyNames, $magicProperties));
+        }
+
+        return $propertyNames;
     }
 
 }
