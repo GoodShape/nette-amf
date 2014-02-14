@@ -16,6 +16,7 @@ class AmfExtension extends CompilerExtension {
     private $defaults = [
         'requestNamespaces' => [],
         'mappings' => [],
+        'module' => 'Api',
     ];
 
 

@@ -10,6 +10,7 @@ use Goodshape\Amf\Helpers\Serializer;
 use Nette\Application\IResponse;
 use Nette\Http\Request;
 use Nette\Object;
+use Shiraz\Model\Remote\DateTime;
 use TokenReflection;
 
 /**
@@ -24,12 +25,10 @@ class Manager extends Object {
     private $requestPacket;
     /** @var int */
     private $currentMessageIndex = 0;
-
-    private $bcPresenter = 'Old:call';
     /** @var Request */
     private $httpRequest;
     /** @var string default module name */
-    private $module = 'Service';
+    private $module;
     /** @var array */
     private $responses = [];
     /** @var CustomClassConvertor */
@@ -48,6 +47,7 @@ class Manager extends Object {
         $this->config = $config;
         $this->classConvertor = new CustomClassConvertor(isset($config['requestNamespaces'])?$config['requestNamespaces']:NULL);
         $this->destinationMappings = isset($config['mappings'])?$config['mappings']:[];
+        $this->module = $config['module'];
     }
 
 
@@ -125,12 +125,7 @@ class Manager extends Object {
      * @return array
      */
     public function getData($target) {
-        $data = $this->getCurrentMessage()['data'];
-        if($target === $this->bcPresenter) {
-            $data = [$data];
-            array_unshift($data, $this->getCurrentMessage()['target']);
-        }
-        return $data;
+        return $this->getCurrentMessage()['data'];
     }
 
     private function convertDestination($target) {
