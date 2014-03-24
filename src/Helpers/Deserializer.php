@@ -90,7 +90,7 @@ class Deserializer {
      * @param string $rawPostData
      * @return Packet
      */
-    public function deserialize(array $getData, array $postData, $rawPostData) {
+    public function deserialize($rawPostData) {
         $this->rawData = $rawPostData;
         $this->currentByte = 0;
         $this->deserializedPacket = new Packet();
@@ -140,7 +140,7 @@ class Deserializer {
             $type = $this->readByte();  // grab the type of the element
             $content = $this->readData($type); // turn the element into real data
 
-            $this->deserializedPacket->headers[] = ['name' => $name, 'required' => $required, 'content' => $content];
+            $this->deserializedPacket->headers[$name] = $content;
         }
     }
 

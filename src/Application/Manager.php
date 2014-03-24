@@ -7,6 +7,8 @@ use Goodshape\Amf\Helpers\CustomClassConvertor;
 use Goodshape\Amf\Helpers\Deserializer;
 use Goodshape\Amf\Helpers\Packet;
 use Goodshape\Amf\Helpers\Serializer;
+use Goodshape\Amf\Http\AMFRequest;
+use Goodshape\Amf\Http\AMFRequestFactory;
 use Nette\Application\IResponse;
 use Nette\Http\Request;
 use Nette\Object;
@@ -21,8 +23,6 @@ use TokenReflection;
  * @package App\Core\Amf
  */
 class Manager extends Object {
-    /** @var Packet */
-    private $requestPacket;
     /** @var int */
     private $currentMessageIndex = 0;
     /** @var Request */
@@ -31,39 +31,32 @@ class Manager extends Object {
     private $module;
     /** @var array */
     private $responses = [];
-    /** @var CustomClassConvertor */
-    private $classConvertor;
 
     /** @var array */
     private $config;
     private $destinationMappings;
+    /**
+     * @var AMFRequest
+     */
+    private $amfRequest;
 
     /**
      * @param array $config
      * @param Request $httpRequest
      */
-    function __construct($config, Request $httpRequest) {
+    function __construct($config, Request $httpRequest, AMFRequestFactory $amfRequestFactory) {
         $this->httpRequest = $httpRequest;
         $this->config = $config;
-        $this->classConvertor = new CustomClassConvertor(isset($config['requestNamespaces'])?$config['requestNamespaces']:NULL);
         $this->destinationMappings = isset($config['mappings'])?$config['mappings']:[];
         $this->module = $config['module'];
+        $this->amfRequest = $amfRequestFactory->getRequest();
     }
 
 
-    private function prepare() {
-        $deselizer = new Deserializer();
-        $this->requestPacket = $deselizer->deserialize($this->httpRequest->getQuery(), $this->httpRequest->getPost(), $this->getRawData());
-        foreach($this->requestPacket->messages as &$message) {
-            $message = $this->classConvertor->convert($message);
-        }
-    }
+
 
     private function getCurrentMessage() {
-        if($this->requestPacket === NULL) {
-            $this->prepare();
-        }
-        return $this->requestPacket->messages[$this->currentMessageIndex];
+        return $this->amfRequest->getMessage($this->currentMessageIndex);
     }
 
 
@@ -74,24 +67,13 @@ class Manager extends Object {
         $this->currentMessageIndex++;
     }
 
-    private function getRawData() {
-        if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
-            return $GLOBALS['HTTP_RAW_POST_DATA'];
-        } else{
-            return file_get_contents('php://input');
-        }
-    }
-
     /**
      * Returns sign of there is more messages to process
      *
      * @return bool
      */
     public function hasMoreMessages() {
-        if(!is_object($this->requestPacket)) {
-            return FALSE;
-        }
-        return count($this->requestPacket->messages) > count($this->responses);
+        return $this->amfRequest->getMessageCount() > count($this->responses);
     }
 
     /**
@@ -146,7 +128,7 @@ class Manager extends Object {
     public function sendResponse() {
         $serializer = new Serializer();
         $packet = new Packet();
-        foreach($this->requestPacket->messages as $index => $message) {
+        foreach($this->amfRequest->getMessages() as $index => $message) {
             $packet->messages[] =
                 (object) ['targetUri' => $message['response'].'/onResult', 'responseUri' => null,'data' => $this->responses[$index]];
 
@@ -162,5 +144,9 @@ class Manager extends Object {
         return $this->responses;
     }
 
+    public function isAMFRequest()
+    {
+        return in_array($this->httpRequest->getHeader('Content-type'), AMFRequestFactory::$contentTypes);
+    }
 
-} 
+}

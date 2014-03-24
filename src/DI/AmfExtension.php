@@ -3,6 +3,10 @@
 namespace Goodshape\Amf\DI;
 
 
+use Goodshape\Amf\Helpers\CustomClassConvertor;
+use Goodshape\Amf\Http\AMFRequest;
+use Goodshape\Amf\Http\AMFRequestFactory;
+use Goodshape\Amf\Http\HttpRequestFactory;
 use Nette\DI\CompilerExtension;
 
 /**
@@ -11,7 +15,8 @@ use Nette\DI\CompilerExtension;
  * @author Jan Langer <jan.langer@goodshape.cz>
  * @package Goodshape\Amf\DI
  */
-class AmfExtension extends CompilerExtension {
+class AmfExtension extends CompilerExtension
+{
 
     private $defaults = [
         'requestNamespaces' => [],
@@ -20,7 +25,8 @@ class AmfExtension extends CompilerExtension {
     ];
 
 
-    public function loadConfiguration() {
+    public function loadConfiguration()
+    {
 
         $builder = $this->getContainerBuilder();
         $config = $this->getConfig($this->defaults);
@@ -28,6 +34,21 @@ class AmfExtension extends CompilerExtension {
         $manager = $builder->addDefinition($this->prefix('manager'))
                            ->setClass('Goodshape\Amf\Application\Manager', [$config]
             );
+
+        $customClassConvertor = $builder->addDefinition($this->prefix('classConvertor'))
+            ->setClass(CustomClassConvertor::class, [$config['requestNamespaces']])
+            ->setInject(FALSE)->setAutowired(FALSE);
+
+        $factory = $builder->addDefinition($this->prefix('factory'))
+            ->setClass(AMFRequestFactory::class, [$customClassConvertor])
+            ->setInject(FALSE);
+
+
+        $builder->getDefinition('nette.httpRequestFactory')
+                ->setClass(HttpRequestFactory::class);
+
+
+
 
     }
 

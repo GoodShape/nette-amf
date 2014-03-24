@@ -19,11 +19,6 @@ use Nette\Application\Routers\Route as NRoute;
  */
 class Route implements Nette\Application\IRouter {
 
-    /** @var array supported content types */
-    private $contentTypes = [
-        'application/x-amf',
-    ];
-
     /** @var Manager */
     private $manager;
 
@@ -172,7 +167,7 @@ class Route implements Nette\Application\IRouter {
 			return NULL;
 		}
 
-        if(!in_array($httpRequest->getHeader('Content-type'), $this->contentTypes)) {
+        if(!$this->manager->isAMFRequest()) {
             return null;
         }
 
