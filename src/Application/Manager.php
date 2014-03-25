@@ -49,7 +49,9 @@ class Manager extends Object {
         $this->config = $config;
         $this->destinationMappings = isset($config['mappings'])?$config['mappings']:[];
         $this->module = $config['module'];
-        $this->amfRequest = $amfRequestFactory->getRequest();
+        if($this->isAMFRequest()) {
+            $this->amfRequest = $amfRequestFactory->getRequest();
+        }
     }
 
 
