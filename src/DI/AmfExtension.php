@@ -43,6 +43,9 @@ class AmfExtension extends CompilerExtension
             ->setClass(AMFRequestFactory::class, [$customClassConvertor])
             ->setInject(FALSE);
 
+        if(PHP_SAPI === 'cli') {
+            return; //avoid collision with Kdyby\Console
+        }
 
         $builder->getDefinition('nette.httpRequestFactory')
                 ->setClass(HttpRequestFactory::class);
