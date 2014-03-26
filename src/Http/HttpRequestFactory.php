@@ -22,6 +22,7 @@ class HttpRequestFactory extends RequestFactory {
 
         if($this->amfRequestFactory->isAMFRequest($httpRequest)) {
             $headers = $this->amfRequestFactory->getRequest()->getHeaders();
+            $headers = array_change_key_case($headers, CASE_LOWER);
 
             $property = $httpRequest->getReflection()->getProperty('headers');
             $property->setAccessible(TRUE);
